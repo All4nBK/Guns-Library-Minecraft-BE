@@ -26,5 +26,5 @@ world.afterEvents.itemStopUse.subscribe((event) => {
 
 ```
 ## Warning
-For this library to work it needs another library called [support](https://github.com/All4nBK/Suport-Script-Bedrock) for Minecraft Bedrock Edition
+For this library to work it needs another library called [support](https://github.com/All4nBK/Support-Script-Bedrock) for Minecraft Bedrock Edition
 ![animation_me2](https://github.com/All4nBK/Guns-Library-Minecraft-BE/assets/101974432/0a6117fa-4f05-486f-ba62-05d8722ea525)
