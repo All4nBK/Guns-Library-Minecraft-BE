@@ -6,14 +6,6 @@ It allows players to use weapons and cause damage to entities based on the weapo
 import { world } from '@minecraft/server';
 import {weaponLib} from './libs/guns';
 
-//  Object Json containing the weapon and its information (damage, ammo). Remember that the ammo must be a scoreboard for the code to work and the item used must be one that can be consumed.
-const weapons = {
-    "minecraft:apple": { damage: 5, ammo: "ammo1" },
-    "minecraft:carrot": { damage: 13, ammo: "ammo2" },
-};
-
-weaponLib(weapons);
-
 world.afterEvents.itemStartUse.subscribe((event) => {
     weaponLib.handleItemStartUse(event);
     weaponLib.startDamageLoop();
