@@ -1,4 +1,4 @@
-# Guns Library Minecraft BE
+# ![perfil_small](https://github.com/All4nBK/Guns-Library-Minecraft-BE/assets/101974432/cd5ca498-8625-4da9-a712-4b14b014e2e8)Guns Library Minecraft BE
 This class provides functionality for registering and controlling weapons in a Minecraft Bedrock Edition environment. 
 It allows players to use weapons and cause damage to entities based on the weapon used.
 ## Example use
