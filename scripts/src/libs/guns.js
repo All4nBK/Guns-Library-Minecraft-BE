@@ -1,5 +1,5 @@
 import { system, world } from '@minecraft/server';
-import { scoreboard, actionbar } from '.suport/suport';
+import { scoreboard, actionbar } from '.suport/support';
 /**
  * Guns Library Minecraft BE.
  * 
