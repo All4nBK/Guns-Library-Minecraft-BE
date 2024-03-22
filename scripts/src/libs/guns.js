@@ -1,5 +1,5 @@
 import { system, world } from '@minecraft/server';
-import { scoreboard, actionbar } from '.support/support';
+import { support } from './support/support';
 /**
  * Guns Library Minecraft BE.
  * 
@@ -20,12 +20,16 @@ export class WeaponLibrary {
      * @constructor
      * @param {object} weapons - An object containing the available weapons, where the keys are the names of the weapons and the values are objects containing information about each weapon.
      */
+
+    /**
+     * Array to store weapons data.
+     */
+    static pool_weapon = []
+
+    static on_use_item = false;
+
     constructor(weapons) {
         this.weapons = weapons;
-        /**
-         * Map that keeps track of players and their weapons.
-         */
-        this.playersWithWeapons = new Map();
         /**
          * ID of the interval used to control the periodic execution of damage.
          */
@@ -35,11 +39,6 @@ export class WeaponLibrary {
          * @type {Function}
          */
         this.handleItemStartUse = this.handleItemStartUse.bind(this);
-        /**
-         * Linked method to handle the termination of a player's use of an item.
-         * @type {Function}
-         */
-        this.handleItemStopUse = this.handleItemStopUse.bind(this);
     }
 
     /**
@@ -52,17 +51,10 @@ export class WeaponLibrary {
         const weaponName = item.typeId;
         const weapon = this.weapons[weaponName];
         if (weapon) {
-            this.playersWithWeapons.set(player.nameTag, { player, item, weapon });
+            WeaponLibrary.pool_weapon.push({
+                player, item, weapon
+            })
         }
-    }
-
-    /**
-     * Removes the registration of a weapon for a player.
-     * 
-     * @param {any} player - The player whose weapon registration should be removed.
-     */
-    unregisterWeapon(player) {
-        this.playersWithWeapons.delete(player.nameTag);
     }
 
     /**
@@ -74,43 +66,34 @@ export class WeaponLibrary {
         const player = event.source;
         const item = event.itemStack;
         this.registerWeapon(player, item);
+        WeaponLibrary.on_use_item = true;
     }
-
-    /**
-     * Deals with the termination of a player's use of an item.
-     * 
-     * @param {any} event - The event that triggered the termination of the item's use.
-     */
-    handleItemStopUse(event) {
-        const player = event.source;
-        this.unregisterWeapon(player);
-    }
-
-    /**
-     * Starts a loop to periodically apply damage caused by players' weapons.
-     */
-    startDamageLoop() {
-        this.intervalId = system.runInterval(() => {
-            this.playersWithWeapons.forEach(({ player, weapon }) => {
-                if ( scoreboard(player,weapon.ammo,{return: 'returnNumber'}) > 0 ) {
-                    actionbar(player,`${scoreboard(player, weapon.ammo, { return: "remove", value: 1 })}`)
-                    const entities = player.getEntitiesFromViewDirection({ maxDistance: 20 });
-                    const victim = entities.find(result => result.entity.getComponent('health'));
-                    if (victim) {
-                        victim.entity.applyDamage(weapon.damage);
-                    }
-                }
-            });
-        }, 10);
-    }
-
-    /**
-     * For the periodic damage application loop.
-     */
-    stopDamageLoop() {
-        if (this.intervalId !== null) {
-            system.clearRun(this.intervalId);
-            this.intervalId = null;
-        }
+    handleItemStopUse() {
+        WeaponLibrary.on_use_item = false;
     }
 }
+
+// Run interval to clear weapon pool
+system.runInterval(() => {
+    WeaponLibrary.pool_weapon.forEach((element, index) => {
+        const { player, item, weapon } = element;
+        if (WeaponLibrary.on_use_item == false)
+            delete WeaponLibrary.pool_weapon[index]
+        if (weapon.ammo != null) {
+            if (support.scoreboard(player, weapon.ammo, { return: 'return' }) > 0) {
+                support.actionbar(player, `${support.scoreboard(player, weapon.ammo, { return: 'remove', value: 1 })}`)
+                const entities = player.getEntitiesFromViewDirection({ maxDistance: 20 });
+                const victim = entities.find(result => result.entity.getComponent('health'));
+                if (victim) {
+                    victim.entity.applyDamage(weapon.damage);
+                }
+            }
+        } else {
+            const entities = player.getEntitiesFromViewDirection({ maxDistance: 20 });
+            const victim = entities.find(result => result.entity.getComponent('health'));
+            if (victim) {
+                victim.entity.applyDamage(weapon.damage);
+            }
+        }
+    })
+});
